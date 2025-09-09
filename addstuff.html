@@ -1,0 +1,99 @@
+// ...existing code...
+        // Player object
+        const player = {
+            x: canvas.width / 2 - 15,
+            y: canvas.height - 50,
+            width: 30,
+            height: 30,
+            speed: 0,
+            maxSpeed: 7,
+            acceleration: 0.5,
+            friction: 0.85,
+            color: '#00ff00',
+            trail: [],
+            vy: 0, // vertical velocity
+            gravity: 0.8,
+            jumpStrength: -14,
+            isOnGround: true
+        };
+// ...existing code...
+
+        // Input handling
+        const keys = {};
+        document.addEventListener('keydown', (e) => {
+            keys[e.key.toLowerCase()] = true;
+            // Jump on ArrowUp, W, or Space
+            if ((e.key === 'ArrowUp' || e.key.toLowerCase() === 'w' || e.key === ' ') && player.isOnGround && gameState === 'playing') {
+                player.vy = player.jumpStrength;
+                player.isOnGround = false;
+            }
+        });
+        document.addEventListener('keyup', (e) => {
+            keys[e.key.toLowerCase()] = false;
+        });
+// ...existing code...
+
+        function updatePlayer() {
+            // Handle input
+            if (keys['arrowleft'] || keys['a']) {
+                player.speed -= player.acceleration;
+            }
+            if (keys['arrowright'] || keys['d']) {
+                player.speed += player.acceleration;
+            }
+
+            // Apply physics
+            player.speed *= player.friction;
+            player.speed = Math.max(-player.maxSpeed, Math.min(player.maxSpeed, player.speed));
+            player.x += player.speed;
+
+            // Jump physics
+            player.vy += player.gravity;
+            player.y += player.vy;
+
+            // Ground collision
+            if (player.y >= canvas.height - player.height) {
+                player.y = canvas.height - player.height;
+                player.vy = 0;
+                player.isOnGround = true;
+            }
+
+            // Keep player in bounds horizontally
+            player.x = Math.max(0, Math.min(canvas.width - player.width, player.x));
+
+            // Add to trail for visual effect
+            player.trail.push({x: player.x, y: player.y});
+            if (player.trail.length > 10) {
+                player.trail.shift();
+            }
+        }
+// ...existing code...
+
+        function startGame(diff) {
+            difficulty = diff;
+            gameState = 'playing';
+            score = 0;
+            blocks = [];
+            shadows = [];
+            particles = [];
+            recordedPath = [];
+            recordTimer = 0;
+            shadowSpawnTimer = 0;
+            blockSpawnTimer = 0;
+            
+            player.x = canvas.width / 2 - 15;
+            player.y = canvas.height - 50;
+            player.speed = 0;
+            player.trail = [];
+            player.vy = 0;
+            player.isOnGround = true;
+            
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameOver').style.display = 'none';
+            document.getElementById('score').textContent = '0';
+            document.getElementById('shadowCount').textContent = '0';
+            
+            lastTime = performance.now();
+            gameLoop(lastTime);
+        }
+// ...existing code...
